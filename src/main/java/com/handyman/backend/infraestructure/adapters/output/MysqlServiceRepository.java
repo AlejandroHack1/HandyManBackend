@@ -296,7 +296,6 @@ public class MysqlServiceRepository implements ServiceRepository, CalculoHorasRe
 
                     CalculoDAO calculoDAO = CalculoDAO.fromResultSet(result);
 
-                    System.out.println(calculoDAO);
                     // logic ---
                     Calculo calculo = calculoDAO.toDomain();
                     return Optional.of(calculo);
