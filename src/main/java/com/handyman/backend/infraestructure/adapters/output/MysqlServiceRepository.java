@@ -226,7 +226,7 @@ public class MysqlServiceRepository implements ServiceRepository, CalculoHorasRe
 
             ResultSet result = preparedStatement.executeQuery();
 
-            System.out.println(result.next());
+            result.next();
             try {
 
                 position = result.getString("position");
@@ -259,60 +259,60 @@ public class MysqlServiceRepository implements ServiceRepository, CalculoHorasRe
 
         String position = getElementPosition(semanas.getValue(), tecnicoId.getValue());
 
-        //obtiene elemento de la lista correspondiente a la posición encontrada en semanas.
-        String sqlGetElementsFromList = "select SUBSTRING_INDEX( SUBSTRING_INDEX( id, ',', 1 ), ',', -1 ) as id, \n" +
-                "SUBSTRING_INDEX( SUBSTRING_INDEX( semanas, ',', ? ), ',', -1 ) as semanas,\n" +
-                "SUBSTRING_INDEX( SUBSTRING_INDEX( idTecnico, ',', 1 ), ',', -1 ) as idTecnico,\n" +
-                "SUBSTRING_INDEX( SUBSTRING_INDEX( horasNormales, ',', ? ), ',', -1 ) as horasNormales,\n" +
-                "SUBSTRING_INDEX( SUBSTRING_INDEX( horasNocturnas, ',', ? ), ',', -1 ) as horasNocturnas,\n" +
-                "SUBSTRING_INDEX( SUBSTRING_INDEX( horasDominicales, ',', ? ), ',', -1 ) as horasDominicales,\n" +
-                "SUBSTRING_INDEX( SUBSTRING_INDEX( horasNormalesExtras, ',', ? ), ',', -1 ) as horasNormalesExtras,\n" +
-                "SUBSTRING_INDEX( SUBSTRING_INDEX( horasNocturnasExtras, ',', ? ), ',', -1 ) as horasNocturnasExtras,\n" +
-                "SUBSTRING_INDEX( SUBSTRING_INDEX( horasDominicalesExtras, ',', ? ), ',', -1 ) as horasDominicalesExtras\n" +
-                "\n" +
-                "from calculo where idTecnico = ?;";
+        if (Integer.parseInt(position) != 0) {
+            //obtiene elemento de la lista correspondiente a la posición encontrada en semanas.
+            String sqlGetElementsFromList = "select SUBSTRING_INDEX( SUBSTRING_INDEX( id, ',', 1 ), ',', -1 ) as id, \n" +
+                    "SUBSTRING_INDEX( SUBSTRING_INDEX( semanas, ',', ? ), ',', -1 ) as semanas,\n" +
+                    "SUBSTRING_INDEX( SUBSTRING_INDEX( idTecnico, ',', 1 ), ',', -1 ) as idTecnico,\n" +
+                    "SUBSTRING_INDEX( SUBSTRING_INDEX( horasNormales, ',', ? ), ',', -1 ) as horasNormales,\n" +
+                    "SUBSTRING_INDEX( SUBSTRING_INDEX( horasNocturnas, ',', ? ), ',', -1 ) as horasNocturnas,\n" +
+                    "SUBSTRING_INDEX( SUBSTRING_INDEX( horasDominicales, ',', ? ), ',', -1 ) as horasDominicales,\n" +
+                    "SUBSTRING_INDEX( SUBSTRING_INDEX( horasNormalesExtras, ',', ? ), ',', -1 ) as horasNormalesExtras,\n" +
+                    "SUBSTRING_INDEX( SUBSTRING_INDEX( horasNocturnasExtras, ',', ? ), ',', -1 ) as horasNocturnasExtras,\n" +
+                    "SUBSTRING_INDEX( SUBSTRING_INDEX( horasDominicalesExtras, ',', ? ), ',', -1 ) as horasDominicalesExtras\n" +
+                    "\n" +
+                    "from calculo where idTecnico = ?;";
+
+            try (Connection connection = dataSource.getConnection();
+
+                 PreparedStatement preparedStatement = connection.prepareStatement(sqlGetElementsFromList)) {
+
+                preparedStatement.setString(1, position);
+                preparedStatement.setString(2, position);
+                preparedStatement.setString(3, position);
+                preparedStatement.setString(4, position);
+                preparedStatement.setString(5, position);
+                preparedStatement.setString(6, position);
+                preparedStatement.setString(7, position);
+
+                preparedStatement.setString(8, tecnicoId.getValue());
+
+                ResultSet result = preparedStatement.executeQuery();
 
 
-        String sql = "Select * From calculo Where idTecnico = ? And semanas like ?";
+                result.next();
+                //if (result.next() == true) {
+                try {
 
+                    CalculoDAO calculoDAO = CalculoDAO.fromResultSet(result);
 
-        try (Connection connection = dataSource.getConnection();
+                    System.out.println(calculoDAO);
+                    // logic ---
+                    Calculo calculo = calculoDAO.toDomain();
+                    return Optional.of(calculo);
 
-             PreparedStatement preparedStatement = connection.prepareStatement(sqlGetElementsFromList)){
+                } catch (SQLException exception) {
 
-             preparedStatement.setString(1, position);
-             preparedStatement.setString(2, position);
-             preparedStatement.setString(3, position);
-             preparedStatement.setString(4, position);
-             preparedStatement.setString(5, position);
-             preparedStatement.setString(6, position);
-             preparedStatement.setString(7, position);
-
-             preparedStatement.setString(8, tecnicoId.getValue());
-
-            ResultSet result = preparedStatement.executeQuery();
-
-
-            System.out.println(result.next());
-            //if (result.next() == true) {
-            try {
-
-                CalculoDAO calculoDAO = CalculoDAO.fromResultSet(result);
-
-                System.out.println(calculoDAO);
-                // logic ---
-                Calculo calculo = calculoDAO.toDomain();
-                return Optional.of(calculo);
+                    System.out.println(exception);
+                    return Optional.empty();
+                }
 
             } catch (SQLException exception) {
 
-                System.out.println(exception);
-                return Optional.empty();
+                throw new RuntimeException("Error queryn database", exception);
             }
-
-        } catch (SQLException exception) {
-
-            throw new RuntimeException("Error queryn database", exception);
+        } else {
+            return Optional.empty();
         }
     }
 }
