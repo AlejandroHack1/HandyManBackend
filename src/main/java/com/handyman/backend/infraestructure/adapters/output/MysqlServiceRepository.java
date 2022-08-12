@@ -18,10 +18,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.Optional;
 
 
@@ -78,26 +74,6 @@ public class MysqlServiceRepository implements ServiceRepository, CalculoHorasRe
                 ServiceDAO serviceDAO = ServiceDAO.fromResultSet(resultSet);
                 // logic ---
                 Service service = serviceDAO.toDomain();
-
-                CalculateHours calculateHours = new CalculateHours();
-
-                String input = "2022-07-23 11:45";
-                String format = "yyyyMMdd";
-
-                SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-                Date date = null;
-                try {
-                    date = df.parse(service.getfInicio().getValue());
-                } catch (ParseException e) {
-                    throw new RuntimeException(e);
-                }
-
-                Calendar cal = Calendar.getInstance();
-                cal.setTime(date);
-                int week = cal.get(Calendar.WEEK_OF_YEAR);
-                System.out.println(week);
-                String[] result = calculateHours.operation(service);
-                System.out.println("Calculo Semanas: " + result[0]);
 
                 return Optional.of(service);
             } else {
@@ -211,9 +187,9 @@ public class MysqlServiceRepository implements ServiceRepository, CalculoHorasRe
 
     }
 
-    public String getElementPosition(String semana, String tecnicoId) {
+    public int getElementPosition(String semana, String tecnicoId) {
 
-        String position = null;
+        int position = 0;
         //encontrar la posición del número de la semana a consultar en list semanas de la BD.
         String sqlFindIndex = "SELECT FIND_IN_SET(?, semanas) as position from calculo where idTecnico = ?";
 
@@ -229,25 +205,23 @@ public class MysqlServiceRepository implements ServiceRepository, CalculoHorasRe
             result.next();
             try {
 
-                position = result.getString("position");
+                position = Integer.parseInt(result.getString("position"));
 
                 /*CalculoDTO calculo = new CalculoDTO();
                 calculo.setPosition(position);
 
                 System.out.println(position);*/
 
-                return position;
             } catch (SQLException exception) {
-
                 System.out.println(exception);
             }
+
+            return position;
+
 
         } catch (SQLException exception) {
             throw new RuntimeException("Error queryn database", exception);
         }
-
-        return position;
-
     }
 
 
@@ -257,9 +231,10 @@ public class MysqlServiceRepository implements ServiceRepository, CalculoHorasRe
         System.out.println(tecnicoId.getValue());
         System.out.println(semanas.getValue());
 
-        String position = getElementPosition(semanas.getValue(), tecnicoId.getValue());
+        int positionValue = getElementPosition(semanas.getValue(), tecnicoId.getValue());
+        String position = String.valueOf(positionValue);
 
-        if (Integer.parseInt(position) != 0) {
+        if (positionValue != 0 ) {
             //obtiene elemento de la lista correspondiente a la posición encontrada en semanas.
             String sqlGetElementsFromList = "select SUBSTRING_INDEX( SUBSTRING_INDEX( id, ',', 1 ), ',', -1 ) as id, \n" +
                     "SUBSTRING_INDEX( SUBSTRING_INDEX( semanas, ',', ? ), ',', -1 ) as semanas,\n" +
