@@ -164,7 +164,6 @@ public class CalculateHours {
 
         if (acumulado >= 48) {
             dominicalExtra = calcDominicales;
-            calcDominicales = 0;
         }
 
         if (Calendar.SUNDAY == calInicio.get(Calendar.DAY_OF_WEEK) && Calendar.SUNDAY != calFin.get(Calendar.DAY_OF_WEEK)

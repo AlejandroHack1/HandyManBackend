@@ -18,10 +18,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.Optional;
 
 
@@ -78,26 +74,6 @@ public class MysqlServiceRepository implements ServiceRepository, CalculoHorasRe
                 ServiceDAO serviceDAO = ServiceDAO.fromResultSet(resultSet);
                 // logic ---
                 Service service = serviceDAO.toDomain();
-
-                CalculateHours calculateHours = new CalculateHours();
-
-                String input = "2022-07-23 11:45";
-                String format = "yyyyMMdd";
-
-                SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-                Date date = null;
-                try {
-                    date = df.parse(service.getfInicio().getValue());
-                } catch (ParseException e) {
-                    throw new RuntimeException(e);
-                }
-
-                Calendar cal = Calendar.getInstance();
-                cal.setTime(date);
-                int week = cal.get(Calendar.WEEK_OF_YEAR);
-                System.out.println(week);
-                String[] result = calculateHours.operation(service);
-                System.out.println("Calculo Semanas: " + result[0]);
 
                 return Optional.of(service);
             } else {
