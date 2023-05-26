@@ -31,4 +31,7 @@ semana.
 PM y las 7:00 AM después de que el técnico ya ha trabajado 48 horas esa
 semana.
 - Horas Dominicales Extra: Horas trabajadas el día Domingo después de que
+
+![image](https://github.com/AlejandroHack1/HandyManBackend/assets/17314013/56a69b61-5d11-410d-bb2a-1a9712d10117)
+
 el técnico ya ha trabajado 48 horas esa semana.
